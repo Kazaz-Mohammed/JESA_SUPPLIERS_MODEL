@@ -55,6 +55,13 @@ class ProposalAnalyzer:
     def _load_prompt_template(self) -> str:
         """Load the evaluation prompt template."""
         try:
+            # Try the simple prompt first
+            simple_prompt_path = Path(__file__).parent.parent / "prompts" / "simple_evaluation_prompt.txt"
+            if simple_prompt_path.exists():
+                with open(simple_prompt_path, 'r', encoding='utf-8') as f:
+                    return f.read()
+            
+            # Fall back to the original prompt
             prompt_path = Path(__file__).parent.parent / "prompts" / "evaluation_prompt.txt"
             with open(prompt_path, 'r', encoding='utf-8') as f:
                 return f.read()
@@ -115,6 +122,17 @@ class ProposalAnalyzer:
             analysis_result['model_used'] = self.model
             analysis_result['status'] = 'success'
             
+            # Ensure we have a final_score
+            if 'final_score' not in analysis_result:
+                # Calculate average of all criteria scores
+                scores = []
+                for criterion in analysis_result.get('criteria_scores', {}).values():
+                    if isinstance(criterion, dict) and 'score' in criterion:
+                        scores.append(criterion['score'])
+                
+                if scores:
+                    analysis_result['final_score'] = sum(scores) / len(scores)
+            
             logger.info(f"Analysis completed for {supplier_name}. Final score: {analysis_result.get('final_score', 'N/A')}")
             return analysis_result
             
@@ -150,7 +168,7 @@ class ProposalAnalyzer:
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[
-                        {"role": "system", "content": "You are an expert tender evaluation specialist. You MUST respond with ONLY valid JSON format. Do not include any text before or after the JSON. Start your response directly with the opening brace { and end with the closing brace }."},
+                        {"role": "system", "content": "You are an expert tender evaluation specialist. You MUST respond with ONLY valid JSON format. Do not include any text, newlines, or spaces before the JSON. Start your response directly with the opening brace { and end with the closing brace }. Do not wrap in markdown code blocks."},
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.1,
@@ -191,6 +209,17 @@ class ProposalAnalyzer:
                 response = response[:-3]
             
             response = response.strip()
+            
+            # Handle the specific case where response starts with newline and spaces (common OpenAI issue)
+            if response.startswith('\n') or response.startswith('\r\n'):
+                response = response.lstrip('\n\r \t')
+                logger.info(f"Cleaned response with leading whitespace: {repr(response[:100])}")
+            
+            # Find the first occurrence of { and extract from there if needed
+            start_idx = response.find('{')
+            if start_idx != -1 and start_idx > 0:
+                response = response[start_idx:]
+                logger.info(f"Extracted JSON from first brace in main parser: {repr(response[:100])}")
             
             # Try multiple parsing strategies
             parsing_strategies = [
@@ -239,6 +268,18 @@ class ProposalAnalyzer:
     
     def _try_direct_parse(self, response: str) -> Dict[str, Any]:
         """Try to parse the response directly as JSON."""
+        # Handle the specific case where response starts with newline and spaces
+        if response.startswith('\n') or response.startswith('\r\n'):
+            # Remove leading newlines and whitespace
+            response = response.lstrip('\n\r \t')
+            logger.info(f"Removed leading newlines/spaces: {repr(response[:50])}")
+        
+        # Find the first occurrence of { and extract from there
+        start_idx = response.find('{')
+        if start_idx != -1 and start_idx > 0:
+            response = response[start_idx:]
+            logger.info(f"Extracted JSON from first brace: {repr(response[:50])}")
+        
         return json.loads(response)
     
     def _try_brace_extraction(self, response: str) -> Dict[str, Any]:
