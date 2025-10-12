@@ -1,0 +1,73 @@
+{
+  "evaluation_metadata": {
+    "timestamp": "2025-10-12T22:51:57.583080",
+    "weights_used": {
+      "technical_compliance": 30,
+      "price_competitiveness": 20,
+      "company_experience": 22,
+      "timeline_feasibility": 15,
+      "risk_assessment": 13
+    },
+    "total_suppliers": 1
+  },
+  "summary_statistics": {
+    "total_suppliers": 1,
+    "average_score": 0.0,
+    "highest_score": 0.0,
+    "lowest_score": 0.0,
+    "score_range": 0.0,
+    "top_supplier": "sample_proposal_1.txt",
+    "top_score": 0.0,
+    "evaluation_timestamp": "2025-10-12 22:51:57",
+    "score_distribution": {
+      "excellent": 0,
+      "good": 0,
+      "fair": 0,
+      "poor": 1
+    }
+  },
+  "ranked_suppliers": [
+    {
+      "supplier_name": "sample_proposal_1.txt",
+      "criteria_scores": {
+        "technical_compliance": {
+          "score": 0,
+          "justification": "Analysis failed",
+          "evidence": []
+        },
+        "price_competitiveness": {
+          "score": 0,
+          "justification": "Analysis failed",
+          "evidence": []
+        },
+        "company_experience": {
+          "score": 0,
+          "justification": "Analysis failed",
+          "evidence": []
+        },
+        "timeline_feasibility": {
+          "score": 0,
+          "justification": "Analysis failed",
+          "evidence": []
+        },
+        "risk_assessment": {
+          "score": 0,
+          "justification": "Analysis failed",
+          "evidence": []
+        }
+      },
+      "final_score": 0.0,
+      "overall_summary": "Analysis failed: '\\n  \"supplier_name\"'",
+      "red_flags": [
+        "Analysis system error"
+      ],
+      "recommendations": "Manual review required due to system error",
+      "status": "error",
+      "error": "'\\n  \"supplier_name\"'",
+      "analysis_timestamp": "2025-10-12 22:50:46",
+      "model_used": "gpt-4-turbo-preview",
+      "weighted_score": 0.0,
+      "rank": 1
+    }
+  ]
+}

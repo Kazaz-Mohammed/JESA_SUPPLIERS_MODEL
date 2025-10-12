@@ -150,11 +150,11 @@ class ProposalAnalyzer:
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[
-                        {"role": "system", "content": "You are an expert tender evaluation specialist. Always respond with valid JSON format."},
+                        {"role": "system", "content": "You are an expert tender evaluation specialist. You MUST respond with ONLY valid JSON format. Do not include any text before or after the JSON. Start your response directly with the opening brace { and end with the closing brace }."},
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.1,
-                    max_tokens=2000,
+                    max_tokens=2500,
                     timeout=60
                 )
                 
@@ -175,20 +175,67 @@ class ProposalAnalyzer:
     def _parse_json_response(self, response: str) -> Dict[str, Any]:
         """Parse JSON response from API, handling common formatting issues."""
         try:
-            # Clean the response
+            logger.info(f"Raw API response (first 200 chars): {response[:200]}")
+            
+            # Clean the response - remove leading/trailing whitespace and newlines
             response = response.strip()
             
-            # Find JSON content if wrapped in markdown
+            # Handle markdown code blocks
             if response.startswith('```json'):
                 response = response[7:]
+            elif response.startswith('```'):
+                response = response[3:]
+            
             if response.endswith('```'):
                 response = response[:-3]
             
-            # Try to parse directly
+            response = response.strip()
+            
+            # Try to find the first valid JSON object
+            start_idx = response.find('{')
+            if start_idx != -1:
+                # Find the matching closing brace
+                brace_count = 0
+                end_idx = start_idx
+                for i, char in enumerate(response[start_idx:], start_idx):
+                    if char == '{':
+                        brace_count += 1
+                    elif char == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            end_idx = i + 1
+                            break
+                
+                if end_idx > start_idx:
+                    json_content = response[start_idx:end_idx]
+                    logger.info(f"Extracted JSON content: {json_content[:200]}...")
+                    return json.loads(json_content)
+            
+            # Try to parse the entire response
             return json.loads(response)
             
         except json.JSONDecodeError as e:
             logger.error(f"JSON parsing failed: {e}")
+            logger.error(f"Response content: {response}")
+            
+            # Try to extract JSON from mixed content using regex
+            import re
+            try:
+                # Look for JSON-like content
+                json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+                matches = re.findall(json_pattern, response, re.DOTALL)
+                
+                for match in matches:
+                    try:
+                        parsed = json.loads(match)
+                        if 'supplier_name' in parsed or 'criteria_scores' in parsed:
+                            logger.info(f"Successfully extracted JSON using regex: {match[:100]}...")
+                            return parsed
+                    except json.JSONDecodeError:
+                        continue
+                        
+            except Exception as regex_error:
+                logger.error(f"Regex extraction also failed: {regex_error}")
             
             # Return a fallback structure
             logger.warning("Returning fallback analysis structure")
