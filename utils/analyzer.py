@@ -175,9 +175,10 @@ class ProposalAnalyzer:
     def _parse_json_response(self, response: str) -> Dict[str, Any]:
         """Parse JSON response from API, handling common formatting issues."""
         try:
-            logger.info(f"Raw API response (first 200 chars): {response[:200]}")
+            logger.info(f"Raw API response (first 200 chars): {repr(response[:200])}")
             
             # Clean the response - remove leading/trailing whitespace and newlines
+            original_response = response
             response = response.strip()
             
             # Handle markdown code blocks
@@ -191,51 +192,32 @@ class ProposalAnalyzer:
             
             response = response.strip()
             
-            # Try to find the first valid JSON object
-            start_idx = response.find('{')
-            if start_idx != -1:
-                # Find the matching closing brace
-                brace_count = 0
-                end_idx = start_idx
-                for i, char in enumerate(response[start_idx:], start_idx):
-                    if char == '{':
-                        brace_count += 1
-                    elif char == '}':
-                        brace_count -= 1
-                        if brace_count == 0:
-                            end_idx = i + 1
-                            break
-                
-                if end_idx > start_idx:
-                    json_content = response[start_idx:end_idx]
-                    logger.info(f"Extracted JSON content: {json_content[:200]}...")
-                    return json.loads(json_content)
+            # Try multiple parsing strategies
+            parsing_strategies = [
+                self._try_direct_parse,
+                self._try_brace_extraction,
+                self._try_regex_extraction,
+                self._try_line_by_line_extraction
+            ]
             
-            # Try to parse the entire response
-            return json.loads(response)
+            for i, strategy in enumerate(parsing_strategies):
+                try:
+                    logger.info(f"Trying parsing strategy {i+1}")
+                    result = strategy(response)
+                    if result:
+                        logger.info(f"Successfully parsed using strategy {i+1}")
+                        return result
+                except Exception as strategy_error:
+                    logger.warning(f"Strategy {i+1} failed: {strategy_error}")
+                    continue
             
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON parsing failed: {e}")
-            logger.error(f"Response content: {response}")
+            # If all strategies fail, try with the original response
+            logger.info("All strategies failed, trying with original response")
+            return self._try_direct_parse(original_response)
             
-            # Try to extract JSON from mixed content using regex
-            import re
-            try:
-                # Look for JSON-like content
-                json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
-                matches = re.findall(json_pattern, response, re.DOTALL)
-                
-                for match in matches:
-                    try:
-                        parsed = json.loads(match)
-                        if 'supplier_name' in parsed or 'criteria_scores' in parsed:
-                            logger.info(f"Successfully extracted JSON using regex: {match[:100]}...")
-                            return parsed
-                    except json.JSONDecodeError:
-                        continue
-                        
-            except Exception as regex_error:
-                logger.error(f"Regex extraction also failed: {regex_error}")
+        except Exception as e:
+            logger.error(f"All JSON parsing attempts failed: {e}")
+            logger.error(f"Original response: {repr(original_response[:500])}")
             
             # Return a fallback structure
             logger.warning("Returning fallback analysis structure")
@@ -254,3 +236,74 @@ class ProposalAnalyzer:
                 "recommendations": "Manual review required",
                 "error": str(e)
             }
+    
+    def _try_direct_parse(self, response: str) -> Dict[str, Any]:
+        """Try to parse the response directly as JSON."""
+        return json.loads(response)
+    
+    def _try_brace_extraction(self, response: str) -> Dict[str, Any]:
+        """Try to extract JSON by finding matching braces."""
+        start_idx = response.find('{')
+        if start_idx == -1:
+            return None
+            
+        # Find the matching closing brace
+        brace_count = 0
+        end_idx = start_idx
+        for i, char in enumerate(response[start_idx:], start_idx):
+            if char == '{':
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0:
+                    end_idx = i + 1
+                    break
+        
+        if end_idx > start_idx:
+            json_content = response[start_idx:end_idx]
+            logger.info(f"Extracted JSON content: {repr(json_content[:100])}")
+            return json.loads(json_content)
+        
+        return None
+    
+    def _try_regex_extraction(self, response: str) -> Dict[str, Any]:
+        """Try to extract JSON using regex patterns."""
+        import re
+        
+        # Look for JSON-like content
+        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        matches = re.findall(json_pattern, response, re.DOTALL)
+        
+        for match in matches:
+            try:
+                parsed = json.loads(match)
+                if 'supplier_name' in parsed or 'criteria_scores' in parsed:
+                    logger.info(f"Successfully extracted JSON using regex: {repr(match[:100])}")
+                    return parsed
+            except json.JSONDecodeError:
+                continue
+        
+        return None
+    
+    def _try_line_by_line_extraction(self, response: str) -> Dict[str, Any]:
+        """Try to extract JSON by processing line by line."""
+        lines = response.split('\n')
+        json_lines = []
+        in_json = False
+        
+        for line in lines:
+            line = line.strip()
+            if line.startswith('{'):
+                in_json = True
+                json_lines = [line]
+            elif in_json:
+                json_lines.append(line)
+                if line.endswith('}') and line.count('}') >= line.count('{'):
+                    break
+        
+        if json_lines:
+            json_content = '\n'.join(json_lines)
+            logger.info(f"Extracted JSON by lines: {repr(json_content[:100])}")
+            return json.loads(json_content)
+        
+        return None
