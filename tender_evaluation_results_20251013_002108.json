@@ -1,0 +1,158 @@
+{
+  "evaluation_metadata": {
+    "timestamp": "2025-10-13T00:21:08.725015",
+    "weights_used": {
+      "technical_compliance": 30,
+      "price_competitiveness": 25,
+      "company_experience": 20,
+      "timeline_feasibility": 15,
+      "risk_assessment": 10
+    },
+    "total_suppliers": 2
+  },
+  "summary_statistics": {
+    "total_suppliers": 2,
+    "average_score": 81.0,
+    "highest_score": 90.0,
+    "lowest_score": 72.0,
+    "score_range": 18.0,
+    "top_supplier": "sample_proposal_1.txt",
+    "top_score": 90.0,
+    "evaluation_timestamp": "2025-10-13 00:21:08",
+    "score_distribution": {
+      "excellent": 1,
+      "good": 1,
+      "fair": 0,
+      "poor": 0
+    }
+  },
+  "ranked_suppliers": [
+    {
+      "supplier_name": "sample_proposal_1.txt",
+      "criteria_scores": {
+        "technical_compliance": {
+          "score": 95,
+          "justification": "The proposal exceeds technical specifications with advanced systems and certifications.",
+          "evidence": [
+            "LEED Gold certification capability",
+            "Advanced waterproofing system with 15-year warranty"
+          ]
+        },
+        "price_competitiveness": {
+          "score": 80,
+          "justification": "Pricing is competitive given the quality and scope of work proposed, though slightly higher due to value-added services.",
+          "evidence": [
+            "Total Project Cost: $2,850,000 USD"
+          ]
+        },
+        "company_experience": {
+          "score": 95,
+          "justification": "ABC Construction has extensive experience in commercial construction with a strong portfolio of similar projects.",
+          "evidence": [
+            "Over 50 projects worth $100M+ in total value",
+            "LEED Gold certified projects"
+          ]
+        },
+        "timeline_feasibility": {
+          "score": 90,
+          "justification": "The proposed timeline is realistic and even ahead of schedule, demonstrating efficiency and planning.",
+          "evidence": [
+            "Total project duration: 11 months"
+          ]
+        },
+        "risk_assessment": {
+          "score": 90,
+          "justification": "Comprehensive risk mitigation strategies are in place, addressing potential challenges effectively.",
+          "evidence": [
+            "Weather contingency plans",
+            "Material supplier backup agreements"
+          ]
+        }
+      },
+      "final_score": 90.0,
+      "overall_summary": "ABC Construction Company's proposal presents a highly competent and competitive bid for the JESA Office Building Construction project. Their technical compliance, experience, and risk management are particularly strong, with a realistic timeline and competitive pricing.",
+      "red_flags": [],
+      "recommendations": "Highly recommend proceeding with ABC Construction Company based on their proposal's strengths and alignment with project requirements.",
+      "key_strengths": [
+        "Experienced team with proven track record",
+        "Strong safety and quality programs"
+      ],
+      "areas_for_improvement": [
+        "Further detail in environmental impact assessment",
+        "Clarification on long-term maintenance and operational costs"
+      ],
+      "analysis_timestamp": "2025-10-13 00:17:54",
+      "model_used": "gpt-4-turbo-preview",
+      "status": "success",
+      "weighted_score": 90.0,
+      "rank": 1
+    },
+    {
+      "supplier_name": "sample_proposal_2.txt",
+      "criteria_scores": {
+        "technical_compliance": {
+          "score": 80,
+          "justification": "The proposal meets most technical specifications with innovative additions like triple-glazed windows and a green roof system. However, ISO 9001:2015 certification is pending, and the project timeline exceeds the requirement.",
+          "evidence": [
+            "Triple-glazed windows for superior energy efficiency",
+            "Green roof system for energy efficiency"
+          ]
+        },
+        "price_competitiveness": {
+          "score": 70,
+          "justification": "The total project cost is within a reasonable range considering the sustainable and innovative features proposed. However, the advance payment request is higher than specified in the tender.",
+          "evidence": [
+            "Total Project Cost: $3,200,000 USD",
+            "Advance payment: 40% ($1,280,000)"
+          ]
+        },
+        "company_experience": {
+          "score": 75,
+          "justification": "XYZ Building Solutions has 8 years of experience and has completed several projects with a focus on sustainability. However, their experience with large-scale projects similar to the JESA tender is limited.",
+          "evidence": [
+            "Eco-Friendly Office Complex - $2.5M",
+            "Sustainable Retail Center - $1.8M"
+          ]
+        },
+        "timeline_feasibility": {
+          "score": 60,
+          "justification": "The proposed timeline exceeds the tender requirement by 1 month, and past projects have shown inconsistencies in timeline management.",
+          "evidence": [
+            "Total duration: 13 months",
+            "EcoDevelop Ltd: 'Good work but timeline management needs improvement'"
+          ]
+        },
+        "risk_assessment": {
+          "score": 65,
+          "justification": "Risks include the pending certification, key positions to be filled, and limited large project experience. However, the company's focus on sustainability and innovative techniques mitigates some concerns.",
+          "evidence": [
+            "ISO 9001:2015 certification in progress",
+            "Quality management system still being developed"
+          ]
+        }
+      },
+      "final_score": 70.0,
+      "overall_summary": "XYZ Building Solutions presents a competitive and innovative proposal with a strong focus on sustainability. While the company meets most technical requirements and offers competitive pricing, concerns about timeline feasibility and limited large-scale project experience could pose risks.",
+      "red_flags": [
+        "ISO 9001:2015 certification pending",
+        "Exceeds project duration requirement",
+        "Advance payment request higher than specified"
+      ],
+      "recommendations": "Consider negotiating the advance payment and ensure the ISO 9001:2015 certification and key positions are secured before contract award. Close monitoring of the project timeline is advised.",
+      "key_strengths": [
+        "Innovative sustainable solutions",
+        "Competitive pricing for sustainable solutions"
+      ],
+      "areas_for_improvement": [
+        "Timeline management",
+        "Filling key positions",
+        "Finalizing quality management system"
+      ],
+      "analysis_timestamp": "2025-10-13 00:18:11",
+      "model_used": "gpt-4-turbo-preview",
+      "status": "success",
+      "weighted_score": 72.0,
+      "rank": 2
+    }
+  ]
+}

@@ -34,3 +34,4 @@ SUPPLIER PROPOSAL:
 {supplier_proposal}
 
 Analyze and respond with ONLY the JSON object. Start with {{ and end with }}.
+
