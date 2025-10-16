@@ -280,6 +280,22 @@ For support and questions:
 - Streamlit web interface
 - Excel export functionality
 
+## 📚 Documentation
+
+### **📖 User Documentation**
+- **[User Manual](USER_MANUAL.md)** - Comprehensive guide for using the system
+- **[Google Colab Guide](COLAB_USAGE_GUIDE.md)** - Step-by-step Colab instructions  
+- **[Business Guide](BUSINESS_GUIDE.md)** - Business value and implementation strategy
+
+### **🚀 Technical Documentation**
+- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Production deployment instructions
+- **[Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md)** - Common issues and solutions
+- **[Test Results](TEST_RESULTS_SUMMARY.md)** - Comprehensive testing analysis
+
+### **📊 Project Documentation**
+- **[Phase 6 Testing](TEST_RESULTS_SUMMARY.md)** - Complete testing suite results
+- **[Sample Data](data/)** - Test files for system validation
+
 ---
 
 **JESA Tender Evaluation System** - Making tender evaluation objective, efficient, and transparent.
