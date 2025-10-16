@@ -348,3 +348,41 @@ class ProposalAnalyzer:
             return json.loads(json_content)
         
         return None
+
+
+# Standalone functions for backward compatibility and testing
+def analyze_proposal(proposal_text: str, tender_requirements: str, supplier_name: str = "Unknown", api_key: str = None, model: str = "gpt-4-turbo-preview") -> Dict[str, Any]:
+    """
+    Standalone function to analyze a proposal.
+    
+    Args:
+        proposal_text (str): The proposal text to analyze
+        tender_requirements (str): The tender requirements
+        supplier_name (str): Name of the supplier
+        api_key (str, optional): OpenAI API key
+        model (str): OpenAI model to use
+        
+    Returns:
+        Dict[str, Any]: Analysis results
+    """
+    try:
+        analyzer = ProposalAnalyzer(api_key=api_key, model=model)
+        return analyzer.analyze_proposal(proposal_text, tender_requirements, supplier_name)
+    except Exception as e:
+        logger.error(f"Error in standalone analyze_proposal: {str(e)}")
+        return {
+            'supplier_name': supplier_name,
+            'criteria_scores': {
+                'technical_compliance': {'score': 0, 'justification': 'Analysis failed', 'evidence': []},
+                'price_competitiveness': {'score': 0, 'justification': 'Analysis failed', 'evidence': []},
+                'company_experience': {'score': 0, 'justification': 'Analysis failed', 'evidence': []},
+                'timeline_feasibility': {'score': 0, 'justification': 'Analysis failed', 'evidence': []},
+                'risk_assessment': {'score': 0, 'justification': 'Analysis failed', 'evidence': []}
+            },
+            'final_score': 0.0,
+            'overall_summary': f'Analysis failed: {str(e)}',
+            'red_flags': ['Analysis system error'],
+            'recommendations': 'Manual review required due to system error',
+            'status': 'error',
+            'error': str(e)
+        }

@@ -216,19 +216,104 @@ class PDFProcessor:
             return {'valid': False, 'error': str(e)}
 
 
-def extract_text_from_pdf(pdf_file_path: str) -> str:
+def extract_text_from_pdf(pdf_file_bytes: bytes, filename: str = "document.pdf") -> str:
     """
-    Simple wrapper function for backward compatibility.
+    Extract text from PDF file bytes (for Streamlit file uploads).
     
     Args:
-        pdf_file_path (str): Path to the PDF file
+        pdf_file_bytes (bytes): PDF file content as bytes
+        filename (str): Original filename for error reporting
         
     Returns:
         str: Extracted and cleaned text
     """
-    processor = PDFProcessor()
-    result = processor.extract_text_from_pdf(pdf_file_path)
-    return result.get('text', '')
+    try:
+        import io
+        
+        # Create a temporary file-like object from bytes
+        pdf_file = io.BytesIO(pdf_file_bytes)
+        
+        # Try pdfplumber first
+        try:
+            text_parts = []
+            with pdfplumber.open(pdf_file) as pdf:
+                for page_num, page in enumerate(pdf.pages, 1):
+                    try:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text_parts.append(page_text)
+                    except Exception as e:
+                        continue
+            
+            text = '\n\n'.join(text_parts)
+            
+            # If pdfplumber fails or returns minimal text, try PyPDF2
+            if not text or len(text.strip()) < 100:
+                pdf_file.seek(0)  # Reset file pointer
+                try:
+                    pdf_reader = PyPDF2.PdfReader(pdf_file)
+                    text_parts = []
+                    for page in pdf_reader.pages:
+                        try:
+                            page_text = page.extract_text()
+                            if page_text:
+                                text_parts.append(page_text)
+                        except Exception:
+                            continue
+                    text = '\n\n'.join(text_parts)
+                except Exception:
+                    pass
+            
+            # Clean the text
+            if text:
+                # Remove excessive whitespace
+                text = re.sub(r'\s+', ' ', text)
+                # Remove special characters that might interfere
+                text = re.sub(r'[^\w\s\.\,\!\?\;\:\-\(\)\[\]\{\}\"\'\/\%\$\@\#\&\*\+\=]', '', text)
+                text = text.strip()
+            
+            return text if text else "Error extracting text from PDF"
+            
+        except Exception as e:
+            return f"Error extracting text from PDF: {str(e)}"
+            
+    except Exception as e:
+        return f"Error extracting text from PDF: {str(e)}"
+
+
+def extract_text_from_file(file_bytes: bytes, filename: str) -> str:
+    """
+    Extract text from file bytes (handles both PDF and TXT files).
+    
+    Args:
+        file_bytes (bytes): File content as bytes
+        filename (str): Original filename
+        
+    Returns:
+        str: Extracted text
+    """
+    try:
+        # Check file extension
+        file_ext = filename.lower().split('.')[-1] if '.' in filename else ''
+        
+        if file_ext == 'pdf':
+            return extract_text_from_pdf(file_bytes, filename)
+        elif file_ext == 'txt':
+            # Handle text files
+            try:
+                # Try UTF-8 first
+                return file_bytes.decode('utf-8')
+            except UnicodeDecodeError:
+                try:
+                    # Try Latin-1 as fallback
+                    return file_bytes.decode('latin-1')
+                except UnicodeDecodeError:
+                    return "Error: Unable to decode text file (unsupported encoding)"
+        else:
+            return f"Error: Unsupported file type '{file_ext}'"
+            
+    except Exception as e:
+        return f"Error extracting text from file: {str(e)}"
 
 
 # Example usage and testing
